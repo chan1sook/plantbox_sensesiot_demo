@@ -66,3 +66,11 @@ def toEditPump1Slot(event_struct):
 def toEditPump2Slot(event_struct):
     return
 
+
+def toEditFanSlot(event_struct):
+    return
+
+
+def toEditPumpSlot(event_struct):
+    return
+

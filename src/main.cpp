@@ -47,6 +47,19 @@ const esp_timer_create_args_t update_screen_args = {
     .name = "update_screen_task"};
 
 Adafruit_SHTC3 shtc3 = Adafruit_SHTC3();
+bool hasShtc3;
+sensors_event_t humidityEvent, tempEvent;
+
+#define SOIL_MOIST_PIN (A0)
+// TODO led light switch assign here
+#define LED_RELAY_PIN (2)
+#define PUMP_RELAY_PIN (32)
+#define FAN_RELAY_PIN (33)
+
+#define PIN_ACTIVE_LOW (0)
+
+#define SOIL_MOIST_VAL_MAX (800)
+#define SOIL_MOIST_VAL_MIN (200)
 
 unsigned long dataReadTs;
 unsigned long sendDataTs;
@@ -57,9 +70,9 @@ double temp = NAN;
 double humid = NAN;
 double lightLux = NAN;
 double waterLevel = NAN;
-uint8_t ledState = LOW;
-uint8_t pump1State = LOW;
-uint8_t pump2State = LOW;
+bool ledState = false;
+bool pumpState = false;
+bool fanState = false;
 
 String ssid;
 String wifiPw;
@@ -70,8 +83,8 @@ uint8_t humidSlot;
 uint8_t lightSlot;
 uint8_t waterSlot;
 uint8_t ledCtrlSlot;
-uint8_t pump1CtrlSlot;
-uint8_t pump2CtrlSlot;
+uint8_t pumpCtrlSlot;
+uint8_t fanCtrlSlot;
 
 SensesiotClient protocol = SensesiotClient(siotUid, siotDevKey);
 enum connect_state
@@ -90,15 +103,15 @@ static void initUI2();
 static void beginWifi();
 static void setSwitchStateTo(lv_obj_t *target, bool state);
 static void updateDataStatus();
-static void controlLedTo(uint8_t state);
-static void controlPump1To(uint8_t state);
-static void controlPump2To(uint8_t state);
+static void controlLedTo(bool state);
+static void controlPumpTo(bool state);
+static void controlFanTo(bool state);
 static void controlLedToggle();
-static void controlPump1Toggle();
-static void controlPump2Toggle();
+static void controlPumpToggle();
+static void controlFanToggle();
 void toggleLedWithProtocol();
-void togglePump1WithProtocol();
-void togglePump2WithProtocol();
+void togglePumpWithProtocol();
+void toggleFanWithProtocol();
 void updateSettingPage();
 void boundEditText(lv_obj_t *target, lv_keyboard_mode_t mode, bool isPassword);
 void validateEditText();
@@ -114,13 +127,26 @@ static double getTemp();
 static double getHumidity();
 static double getLight();
 static double getWaterLevel();
+static uint8_t boolToDigitalState(bool state);
+static void setHwLed(uint8_t state);
+static void setHwPump(uint8_t state);
+static void setHwFan(uint8_t state);
 
 void setup()
 {
   Serial.begin(115200);
 
+#if !SENSOR_MOCKUP_DEMO
   Wire.setPins(PIN_SDA, PIN_SCL);
-  shtc3.begin();
+  hasShtc3 = shtc3.begin();
+
+  pinMode(LED_RELAY_PIN, OUTPUT);
+  pinMode(PUMP_RELAY_PIN, OUTPUT);
+  pinMode(FAN_RELAY_PIN, OUTPUT);
+  setHwLed(ledState);
+  setHwPump(pumpState);
+  setHwFan(fanState);
+#endif
 
   initEEPROM();
   beginWifi();
@@ -194,12 +220,12 @@ void loop()
       connectingState = MQTT_CONNECTED;
 
       protocol.subscribeControl(ledCtrlSlot);
-      protocol.subscribeControl(pump1CtrlSlot);
-      protocol.subscribeControl(pump2CtrlSlot);
+      protocol.subscribeControl(pumpCtrlSlot);
+      protocol.subscribeControl(fanCtrlSlot);
 
       protocol.retainControl(ledCtrlSlot);
-      protocol.retainControl(pump1CtrlSlot);
-      protocol.retainControl(pump2CtrlSlot);
+      protocol.retainControl(pumpCtrlSlot);
+      protocol.retainControl(fanCtrlSlot);
     }
   }
   else if (protocol.wifiStatus() != WL_DISCONNECTED && protocol.wifiStatus() != WL_IDLE_STATUS)
@@ -211,10 +237,14 @@ void loop()
   {
     dataReadTs = millis();
 
+    hasShtc3 = shtc3.begin();
+
     temp = getTemp();
     humid = getHumidity();
     lightLux = getLight();
     waterLevel = getWaterLevel();
+
+    // Serial.printf("t:%.2f, h:%.2f, l:%.2f, w:%.2f\n", temp, humid, lightLux, waterLevel);
   }
 
   if (millis() - sendDataTs >= SEND_DATA_DELAY && connectingState == MQTT_CONNECTED)
@@ -309,9 +339,9 @@ static void initUI2()
   lv_label_set_text(ui_PlantScreenStatusLabel, "Connecting...");
   lv_bar_set_range(ui_PlantScreenWaterBar, 0, 100);
   lv_bar_set_value(ui_PlantScreenWaterBar, 0, LV_ANIM_ON);
-  setSwitchStateTo(ui_PlantScreenLedSwitch, ledState == HIGH);
-  setSwitchStateTo(ui_PlantScreenPump1Switch, pump1State == HIGH);
-  setSwitchStateTo(ui_PlantScreenPump2Switch, pump2State == HIGH);
+  setSwitchStateTo(ui_PlantScreenLedSwitch, ledState);
+  setSwitchStateTo(ui_PlantScreenPumpSwitch, pumpState);
+  setSwitchStateTo(ui_PlantScreenFanSwitch, fanState);
 
   updateDataStatus();
 }
@@ -341,8 +371,8 @@ static void initEEPROM()
     EEPROM.writeByte(EEPROM_LIGHT_SLOT_ADDR, 4);
     EEPROM.writeByte(EEPROM_WATER_SLOT_ADDR, 3);
     EEPROM.writeByte(EEPROM_LED_CTRL_SLOT_ADDR, 1);
-    EEPROM.writeByte(EEPROM_PUMP1_CTRL_SLOT_ADDR, 2);
-    EEPROM.writeByte(EEPROM_PUMP2_CTRL_SLOT_ADDR, 3);
+    EEPROM.writeByte(EEPROM_PUMP_CTRL_SLOT_ADDR, 2);
+    EEPROM.writeByte(EEPROM_FAN_CTRL_SLOT_ADDR, 3);
     EEPROM.commit();
   }
 
@@ -356,8 +386,8 @@ static void initEEPROM()
   lightSlot = EEPROM.readByte(EEPROM_LIGHT_SLOT_ADDR);
   waterSlot = EEPROM.readByte(EEPROM_WATER_SLOT_ADDR);
   ledCtrlSlot = EEPROM.readByte(EEPROM_LED_CTRL_SLOT_ADDR);
-  pump1CtrlSlot = EEPROM.readByte(EEPROM_PUMP1_CTRL_SLOT_ADDR);
-  pump2CtrlSlot = EEPROM.readByte(EEPROM_PUMP2_CTRL_SLOT_ADDR);
+  pumpCtrlSlot = EEPROM.readByte(EEPROM_PUMP_CTRL_SLOT_ADDR);
+  fanCtrlSlot = EEPROM.readByte(EEPROM_FAN_CTRL_SLOT_ADDR);
 }
 
 static void beginWifi()
@@ -420,55 +450,58 @@ static void updateDataStatus()
   lv_label_set_text(ui_PlantScreenStatusLabel, status.c_str());
 }
 
-static void controlLedTo(uint8_t state)
+static void controlLedTo(bool state)
 {
   ledState = state;
-  setSwitchStateTo(ui_PlantScreenLedSwitch, ledState == HIGH);
+  setHwLed(ledState);
+  setSwitchStateTo(ui_PlantScreenLedSwitch, ledState);
 }
 
-static void controlPump1To(uint8_t state)
+static void controlPumpTo(bool state)
 {
-  pump1State = state;
-  setSwitchStateTo(ui_PlantScreenPump1Switch, pump1State == HIGH);
+  pumpState = state;
+  setHwPump(pumpState);
+  setSwitchStateTo(ui_PlantScreenPumpSwitch, pumpState);
 }
 
-static void controlPump2To(uint8_t state)
+static void controlFanTo(bool state)
 {
-  pump2State = state;
-  setSwitchStateTo(ui_PlantScreenPump2Switch, pump2State == HIGH);
+  fanState = state;
+  setHwFan(fanState);
+  setSwitchStateTo(ui_PlantScreenFanSwitch, fanState);
 }
 
 static void controlLedToggle()
 {
-  controlLedTo(ledState == HIGH ? LOW : HIGH);
+  controlLedTo(!ledState);
 }
 
-static void controlPump1Toggle()
+static void controlPumpToggle()
 {
-  controlPump1To(pump1State == HIGH ? LOW : HIGH);
+  controlPumpTo(!pumpState);
 }
 
-static void controlPump2Toggle()
+static void controlFanToggle()
 {
-  controlPump2To(pump2State == HIGH ? LOW : HIGH);
+  controlFanTo(!fanState);
 }
 
 void toggleLedWithProtocol()
 {
   controlLedToggle();
-  protocol.setControl(ledCtrlSlot, ledState == HIGH ? CONTROL_STATE_ON : CONTROL_STATE_OFF);
+  protocol.setControl(ledCtrlSlot, ledState ? CONTROL_STATE_ON : CONTROL_STATE_OFF);
 }
 
-void togglePump1WithProtocol()
+void togglePumpWithProtocol()
 {
-  controlPump1Toggle();
-  protocol.setControl(pump1CtrlSlot, pump1State == HIGH ? CONTROL_STATE_ON : CONTROL_STATE_OFF);
+  controlPumpToggle();
+  protocol.setControl(pumpCtrlSlot, pumpState ? CONTROL_STATE_ON : CONTROL_STATE_OFF);
 }
 
-void togglePump2WithProtocol()
+void toggleFanWithProtocol()
 {
-  controlPump2Toggle();
-  protocol.setControl(pump2CtrlSlot, pump2State == HIGH ? CONTROL_STATE_ON : CONTROL_STATE_OFF);
+  controlFanToggle();
+  protocol.setControl(fanCtrlSlot, fanState ? CONTROL_STATE_ON : CONTROL_STATE_OFF);
 }
 
 void updateSettingPage()
@@ -482,8 +515,8 @@ void updateSettingPage()
   lv_textarea_set_text(ui_SettingScreen2LightSlotTextArea, String(lightSlot).c_str());
   lv_textarea_set_text(ui_SettingScreen2WaterSlotTextArea, String(waterSlot).c_str());
   lv_textarea_set_text(ui_SettingScreen2LedSlotTextArea, String(ledCtrlSlot).c_str());
-  lv_textarea_set_text(ui_SettingScreen2Pump1SlotTextArea, String(pump1CtrlSlot).c_str());
-  lv_textarea_set_text(ui_SettingScreen2Pump2SlotTextArea, String(pump2CtrlSlot).c_str());
+  lv_textarea_set_text(ui_SettingScreen2PumpSlotTextArea, String(pumpCtrlSlot).c_str());
+  lv_textarea_set_text(ui_SettingScreen2FanSlotTextArea, String(fanCtrlSlot).c_str());
 }
 
 void boundEditText(lv_obj_t *target, lv_keyboard_mode_t mode, bool isPassword)
@@ -547,15 +580,15 @@ void validateEditText()
       slotValue = data.toInt();
       valid = slotValue > 0 && checkCtrlSlotNotDuplicate(slotValue, ui_SettingScreen2LedSlotTextArea);
     }
-    else if (textareaRef == ui_SettingScreen2Pump1SlotTextArea)
+    else if (textareaRef == ui_SettingScreen2PumpSlotTextArea)
     {
       slotValue = data.toInt();
-      valid = slotValue > 0 && checkCtrlSlotNotDuplicate(slotValue, ui_SettingScreen2Pump1SlotTextArea);
+      valid = slotValue > 0 && checkCtrlSlotNotDuplicate(slotValue, ui_SettingScreen2PumpSlotTextArea);
     }
-    else if (textareaRef == ui_SettingScreen2Pump2SlotTextArea)
+    else if (textareaRef == ui_SettingScreen2FanSlotTextArea)
     {
       slotValue = data.toInt();
-      valid = slotValue > 0 && checkCtrlSlotNotDuplicate(slotValue, ui_SettingScreen2Pump2SlotTextArea);
+      valid = slotValue > 0 && checkCtrlSlotNotDuplicate(slotValue, ui_SettingScreen2FanSlotTextArea);
     }
 
     if (valid)
@@ -572,8 +605,8 @@ lv_obj_t *getSettingPageBackFromEnterText(lv_obj_t *textareaRef)
       textareaRef == ui_SettingScreen2LightSlotTextArea ||
       textareaRef == ui_SettingScreen2WaterSlotTextArea ||
       textareaRef == ui_SettingScreen2LedSlotTextArea ||
-      textareaRef == ui_SettingScreen2Pump1SlotTextArea ||
-      textareaRef == ui_SettingScreen2Pump2SlotTextArea)
+      textareaRef == ui_SettingScreen2PumpSlotTextArea ||
+      textareaRef == ui_SettingScreen2FanSlotTextArea)
   {
     return ui_SettingScreen2;
   }
@@ -612,8 +645,8 @@ static bool checkCtrlSlotNotDuplicate(int value, lv_obj_t *target)
 {
   lv_obj_t *allTargets[] = {
       ui_SettingScreen2LedSlotTextArea,
-      ui_SettingScreen2Pump1SlotTextArea,
-      ui_SettingScreen2Pump2SlotTextArea,
+      ui_SettingScreen2PumpSlotTextArea,
+      ui_SettingScreen2FanSlotTextArea,
   };
 
   int length = sizeof(allTargets) / sizeof(allTargets[0]);
@@ -647,12 +680,12 @@ void confirmEditSetting()
   waterSlot = String(lv_textarea_get_text(ui_SettingScreen2WaterSlotTextArea)).toInt();
 
   protocol.unsubscribeControl(ledCtrlSlot);
-  protocol.unsubscribeControl(pump1CtrlSlot);
-  protocol.unsubscribeControl(pump2CtrlSlot);
+  protocol.unsubscribeControl(pumpCtrlSlot);
+  protocol.unsubscribeControl(fanCtrlSlot);
 
   ledCtrlSlot = String(lv_textarea_get_text(ui_SettingScreen2LedSlotTextArea)).toInt();
-  pump1CtrlSlot = String(lv_textarea_get_text(ui_SettingScreen2Pump1SlotTextArea)).toInt();
-  pump2CtrlSlot = String(lv_textarea_get_text(ui_SettingScreen2Pump2SlotTextArea)).toInt();
+  pumpCtrlSlot = String(lv_textarea_get_text(ui_SettingScreen2PumpSlotTextArea)).toInt();
+  fanCtrlSlot = String(lv_textarea_get_text(ui_SettingScreen2FanSlotTextArea)).toInt();
 
   updateEEPROM();
 
@@ -675,8 +708,8 @@ static void updateEEPROM()
   EEPROM.writeByte(EEPROM_LIGHT_SLOT_ADDR, lightSlot);
   EEPROM.writeByte(EEPROM_WATER_SLOT_ADDR, waterSlot);
   EEPROM.writeByte(EEPROM_LED_CTRL_SLOT_ADDR, ledCtrlSlot);
-  EEPROM.writeByte(EEPROM_PUMP1_CTRL_SLOT_ADDR, pump1CtrlSlot);
-  EEPROM.writeByte(EEPROM_PUMP2_CTRL_SLOT_ADDR, pump2CtrlSlot);
+  EEPROM.writeByte(EEPROM_PUMP_CTRL_SLOT_ADDR, pumpCtrlSlot);
+  EEPROM.writeByte(EEPROM_FAN_CTRL_SLOT_ADDR, fanCtrlSlot);
   EEPROM.commit();
 }
 
@@ -699,34 +732,34 @@ static void onControlCallback(uint8_t slot, const char *data)
       controlLedToggle();
     }
   }
-  else if (slot == pump1CtrlSlot)
+  else if (slot == pumpCtrlSlot)
   {
     if (dataStr.equals("on"))
     {
-      controlPump1To(HIGH);
+      controlPumpTo(HIGH);
     }
     else if (dataStr.equals("off"))
     {
-      controlPump1To(LOW);
+      controlPumpTo(LOW);
     }
     else if (dataStr.equals(""))
     {
-      controlPump1Toggle();
+      controlPumpToggle();
     }
   }
-  else if (slot == pump2CtrlSlot)
+  else if (slot == fanCtrlSlot)
   {
     if (dataStr.equals("on"))
     {
-      controlPump2To(HIGH);
+      controlFanTo(HIGH);
     }
     else if (dataStr.equals("off"))
     {
-      controlPump2To(LOW);
+      controlFanTo(LOW);
     }
     else if (dataStr.equals(""))
     {
-      controlPump2Toggle();
+      controlFanToggle();
     }
   }
 }
@@ -744,33 +777,6 @@ static double getHumidity()
   double humid = 50 + (50 * __dRandomT(t1));
   return humid;
 }
-#else
-static double getTemp()
-{
-  static sensors_event_t humidity, temp;
-  if (shtc3.getEvent(&humidity, &temp))
-  {
-    return humidity.temperature;
-  }
-  else
-  {
-    return NAN;
-  }
-}
-static double getHumidity()
-{
-  static sensors_event_t humidity, temp;
-  if (shtc3.getEvent(&humidity, &temp))
-  {
-    return humidity.relative_humidity;
-  }
-  else
-  {
-    return NAN;
-  }
-}
-#endif
-
 static double getLight()
 {
   double t1 = millis() * 0.001 + 70000;
@@ -783,3 +789,89 @@ static double getWaterLevel()
   double humid = 50 + (50 * __dRandomT(t1));
   return humid;
 }
+#else
+static double getTemp()
+{
+  if (hasShtc3 && shtc3.getEvent(&humidityEvent, &tempEvent))
+  {
+    return tempEvent.temperature;
+  }
+  else
+  {
+    return NAN;
+  }
+}
+static double getHumidity()
+{
+  if (hasShtc3 && shtc3.getEvent(&humidityEvent, &tempEvent))
+  {
+    return humidityEvent.relative_humidity;
+  }
+  else
+  {
+    return NAN;
+  }
+}
+static double getLight()
+{
+  return NAN;
+}
+static double getWaterLevel()
+{
+  int sensorValue = analogRead(SOIL_MOIST_PIN);
+
+  // value transform
+  if (sensorValue < SOIL_MOIST_VAL_MIN)
+  {
+    return 100;
+  }
+  else if (sensorValue > SOIL_MOIST_VAL_MAX)
+  {
+    return 0;
+  }
+
+  int divisor = (SOIL_MOIST_VAL_MAX - SOIL_MOIST_VAL_MIN);
+  double result = (SOIL_MOIST_VAL_MAX - sensorValue) * 100.0f / divisor;
+
+  return result;
+}
+#endif
+
+static uint8_t boolToDigitalState(bool state)
+{
+  uint8_t onState = PIN_ACTIVE_LOW ? LOW : HIGH;
+  uint8_t offState = PIN_ACTIVE_LOW ? HIGH : LOW;
+
+  return state ? onState : offState;
+}
+
+#if SENSOR_MOCKUP_DEMO
+static void setHwLed(uint8_t state)
+{
+  // IDLE
+}
+static void setHwPump(uint8_t state)
+{
+  // IDLE
+}
+static void setHwFan(uint8_t state)
+{
+  // IDLE
+}
+#else
+static void setHwLed(uint8_t state)
+{
+  uint8_t actualState = boolToDigitalState(state);
+  digitalWrite(LED_RELAY_PIN, actualState);
+}
+static void setHwPump(uint8_t state)
+{
+  uint8_t actualState = boolToDigitalState(state);
+  digitalWrite(PUMP_RELAY_PIN, actualState);
+}
+static void setHwFan(uint8_t state)
+{
+  uint8_t actualState = boolToDigitalState(state);
+  digitalWrite(FAN_RELAY_PIN, actualState);
+}
+#endif

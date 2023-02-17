@@ -54,3 +54,11 @@ def togglePump1Switch(event_struct):
 def togglePump2Switch(event_struct):
     return
 
+
+def togglePumpSwitch(event_struct):
+    return
+
+
+def toggleFanSwitch(event_struct):
+    return
+

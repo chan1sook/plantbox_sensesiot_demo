@@ -50,20 +50,20 @@ extern "C"
     extern lv_obj_t *ui_PlantScreenLedLabel;
     void ui_event_PlantScreenLedSwitch(lv_event_t *e);
     extern lv_obj_t *ui_PlantScreenLedSwitch;
-    extern lv_obj_t *ui_PlantScreenPump1Panel;
-    extern lv_obj_t *ui_PlantScreenPump1Label;
-    void ui_event_PlantScreenPump1Switch(lv_event_t *e);
-    extern lv_obj_t *ui_PlantScreenPump1Switch;
-    extern lv_obj_t *ui_PlantScreenPump2Panel;
-    extern lv_obj_t *ui_PlantScreenPump2Label;
-    void ui_event_PlantScreenPump2Switch(lv_event_t *e);
-    extern lv_obj_t *ui_PlantScreenPump2Switch;
+    extern lv_obj_t *ui_PlantScreenPumpPanel;
+    extern lv_obj_t *ui_PlantScreenPumpLabel;
+    void ui_event_PlantScreenPumpSwitch(lv_event_t *e);
+    extern lv_obj_t *ui_PlantScreenPumpSwitch;
+    extern lv_obj_t *ui_PlantScreenFanPanel;
+    extern lv_obj_t *ui_PlantScreenFanLabel;
+    void ui_event_PlantScreenFanSwitch(lv_event_t *e);
+    extern lv_obj_t *ui_PlantScreenFanSwitch;
     extern lv_obj_t *ui_PlantScreenStatusLabel;
 
     void toSettingPage(lv_event_t *e);
     void toggleLedSwitch(lv_event_t *e);
-    void togglePump1Switch(lv_event_t *e);
-    void togglePump2Switch(lv_event_t *e);
+    void togglePumpSwitch(lv_event_t *e);
+    void toggleFanSwitch(lv_event_t *e);
 
     // PROJECT: Plant_Screen_2
 
@@ -154,16 +154,16 @@ extern "C"
     void ui_event_SettingScreen2TempSlotEditBtn1(lv_event_t *e);
     extern lv_obj_t *ui_SettingScreen2TempSlotEditBtn1;
     extern lv_obj_t *ui_SettingScreen2TempSlotEditImg1;
-    extern lv_obj_t *ui_SettingScreen2Pump1SlotLabel;
-    extern lv_obj_t *ui_SettingScreen2Pump1SlotTextArea;
-    void ui_event_SettingScreen2Pump1SlotEditBtn(lv_event_t *e);
-    extern lv_obj_t *ui_SettingScreen2Pump1SlotEditBtn;
-    extern lv_obj_t *ui_SettingScreen2Pump1SlotEditImg;
-    extern lv_obj_t *ui_SettingScreen2Pump2SlotLabel;
-    extern lv_obj_t *ui_SettingScreen2Pump2SlotTextArea;
-    void ui_event_SettingScreen2Pump2SlotEditBtn(lv_event_t *e);
-    extern lv_obj_t *ui_SettingScreen2Pump2SlotEditBtn;
-    extern lv_obj_t *ui_SettingScreen2Pump2SlotEditImg;
+    extern lv_obj_t *ui_SettingScreen2PumpSlotLabel;
+    extern lv_obj_t *ui_SettingScreen2PumpSlotTextArea;
+    void ui_event_SettingScreen2PumpSlotEditBtn(lv_event_t *e);
+    extern lv_obj_t *ui_SettingScreen2PumpSlotEditBtn;
+    extern lv_obj_t *ui_SettingScreen2PumpSlotEditImg;
+    extern lv_obj_t *ui_SettingScreen2FanSlotLabel;
+    extern lv_obj_t *ui_SettingScreen2FanSlotTextArea;
+    void ui_event_SettingScreen2FanSlotEditBtn(lv_event_t *e);
+    extern lv_obj_t *ui_SettingScreen2FanSlotEditBtn;
+    extern lv_obj_t *ui_SettingScreen2FanSlotEditImg;
     void ui_event_SettingScreen2ConfirmBtn(lv_event_t *e);
     extern lv_obj_t *ui_SettingScreen2ConfirmBtn;
     extern lv_obj_t *ui_SettingScreen2ConfirmLabel;
@@ -179,8 +179,8 @@ extern "C"
     void toEditLightSlot(lv_event_t *e);
     void toEditWaterSlot(lv_event_t *e);
     void toEditLedSlot(lv_event_t *e);
-    void toEditPump1Slot(lv_event_t *e);
-    void toEditPump2Slot(lv_event_t *e);
+    void toEditPumpSlot(lv_event_t *e);
+    void toEditFanSlot(lv_event_t *e);
     void settingConfirm(lv_event_t *e);
     void settingCancel(lv_event_t *e);
     void prevSettingPage(lv_event_t *e);

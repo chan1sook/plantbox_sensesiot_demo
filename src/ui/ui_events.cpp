@@ -9,8 +9,8 @@
 extern lv_obj_t *textareaRef;
 
 extern void toggleLedWithProtocol();
-extern void togglePump1WithProtocol();
-extern void togglePump2WithProtocol();
+extern void togglePumpWithProtocol();
+extern void toggleFanWithProtocol();
 extern void updateSettingPage();
 extern void boundEditText(lv_obj_t *target, lv_keyboard_mode_t mode, bool isPassword);
 extern void validateEditText();
@@ -30,14 +30,14 @@ void toggleLedSwitch(lv_event_t *e)
   toggleLedWithProtocol();
 }
 
-void togglePump1Switch(lv_event_t *e)
+void togglePumpSwitch(lv_event_t *e)
 {
-  togglePump1WithProtocol();
+  togglePumpWithProtocol();
 }
 
-void togglePump2Switch(lv_event_t *e)
+void toggleFanSwitch(lv_event_t *e)
 {
-  togglePump2WithProtocol();
+  toggleFanWithProtocol();
 }
 
 // PROJECT: Plant_Screen_2
@@ -137,15 +137,15 @@ void toEditLedSlot(lv_event_t *e)
   lv_scr_load_anim(ui_EditTextScreen, LV_SCR_LOAD_ANIM_FADE_IN, 0, 0, false);
 }
 
-void toEditPump1Slot(lv_event_t *e)
+void toEditPumpSlot(lv_event_t *e)
 {
-  boundEditText(ui_SettingScreen2Pump1SlotTextArea, LV_KEYBOARD_MODE_NUMBER, false);
+  boundEditText(ui_SettingScreen2PumpSlotTextArea, LV_KEYBOARD_MODE_NUMBER, false);
   lv_scr_load_anim(ui_EditTextScreen, LV_SCR_LOAD_ANIM_FADE_IN, 0, 0, false);
 }
 
-void toEditPump2Slot(lv_event_t *e)
+void toEditFanSlot(lv_event_t *e)
 {
-  boundEditText(ui_SettingScreen2Pump2SlotTextArea, LV_KEYBOARD_MODE_NUMBER, false);
+  boundEditText(ui_SettingScreen2FanSlotTextArea, LV_KEYBOARD_MODE_NUMBER, false);
   lv_scr_load_anim(ui_EditTextScreen, LV_SCR_LOAD_ANIM_FADE_IN, 0, 0, false);
 }
 

@@ -34,14 +34,14 @@ lv_obj_t *ui_PlantScreenLedPanel;
 lv_obj_t *ui_PlantScreenLedLabel;
 void ui_event_PlantScreenLedSwitch(lv_event_t *e);
 lv_obj_t *ui_PlantScreenLedSwitch;
-lv_obj_t *ui_PlantScreenPump1Panel;
-lv_obj_t *ui_PlantScreenPump1Label;
-void ui_event_PlantScreenPump1Switch(lv_event_t *e);
-lv_obj_t *ui_PlantScreenPump1Switch;
-lv_obj_t *ui_PlantScreenPump2Panel;
-lv_obj_t *ui_PlantScreenPump2Label;
-void ui_event_PlantScreenPump2Switch(lv_event_t *e);
-lv_obj_t *ui_PlantScreenPump2Switch;
+lv_obj_t *ui_PlantScreenPumpPanel;
+lv_obj_t *ui_PlantScreenPumpLabel;
+void ui_event_PlantScreenPumpSwitch(lv_event_t *e);
+lv_obj_t *ui_PlantScreenPumpSwitch;
+lv_obj_t *ui_PlantScreenFanPanel;
+lv_obj_t *ui_PlantScreenFanLabel;
+void ui_event_PlantScreenFanSwitch(lv_event_t *e);
+lv_obj_t *ui_PlantScreenFanSwitch;
 lv_obj_t *ui_PlantScreenStatusLabel;
 
 ///////////////////// TEST LVGL SETTINGS ////////////////////
@@ -73,22 +73,22 @@ void ui_event_PlantScreenLedSwitch(lv_event_t *e)
         toggleLedSwitch(e);
     }
 }
-void ui_event_PlantScreenPump1Switch(lv_event_t *e)
+void ui_event_PlantScreenPumpSwitch(lv_event_t *e)
 {
     lv_event_code_t event_code = lv_event_get_code(e);
     lv_obj_t *target = lv_event_get_target(e);
     if (event_code == LV_EVENT_CLICKED)
     {
-        togglePump1Switch(e);
+        togglePumpSwitch(e);
     }
 }
-void ui_event_PlantScreenPump2Switch(lv_event_t *e)
+void ui_event_PlantScreenFanSwitch(lv_event_t *e)
 {
     lv_event_code_t event_code = lv_event_get_code(e);
     lv_obj_t *target = lv_event_get_target(e);
     if (event_code == LV_EVENT_CLICKED)
     {
-        togglePump2Switch(e);
+        toggleFanSwitch(e);
     }
 }
 
@@ -300,67 +300,65 @@ void ui_PlantScreen_screen_init(void)
     lv_obj_set_y(ui_PlantScreenLedSwitch, 3);
     lv_obj_set_align(ui_PlantScreenLedSwitch, LV_ALIGN_CENTER);
 
-    ui_PlantScreenPump1Panel = lv_obj_create(ui_PlantScreenSwitchPanel);
-    lv_obj_set_width(ui_PlantScreenPump1Panel, 275);
-    lv_obj_set_height(ui_PlantScreenPump1Panel, 25);
-    lv_obj_set_align(ui_PlantScreenPump1Panel, LV_ALIGN_CENTER);
-    lv_obj_set_flex_flow(ui_PlantScreenPump1Panel, LV_FLEX_FLOW_ROW);
-    lv_obj_set_flex_align(ui_PlantScreenPump1Panel, LV_FLEX_ALIGN_SPACE_BETWEEN, LV_FLEX_ALIGN_CENTER,
-                          LV_FLEX_ALIGN_CENTER);
-    lv_obj_clear_flag(ui_PlantScreenPump1Panel, LV_OBJ_FLAG_SCROLLABLE); /// Flags
-    lv_obj_set_style_bg_color(ui_PlantScreenPump1Panel, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_opa(ui_PlantScreenPump1Panel, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_border_width(ui_PlantScreenPump1Panel, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_pad_left(ui_PlantScreenPump1Panel, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_pad_right(ui_PlantScreenPump1Panel, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_pad_top(ui_PlantScreenPump1Panel, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_pad_bottom(ui_PlantScreenPump1Panel, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    ui_PlantScreenPumpPanel = lv_obj_create(ui_PlantScreenSwitchPanel);
+    lv_obj_set_width(ui_PlantScreenPumpPanel, 275);
+    lv_obj_set_height(ui_PlantScreenPumpPanel, 25);
+    lv_obj_set_align(ui_PlantScreenPumpPanel, LV_ALIGN_CENTER);
+    lv_obj_set_flex_flow(ui_PlantScreenPumpPanel, LV_FLEX_FLOW_ROW);
+    lv_obj_set_flex_align(ui_PlantScreenPumpPanel, LV_FLEX_ALIGN_SPACE_BETWEEN, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+    lv_obj_clear_flag(ui_PlantScreenPumpPanel, LV_OBJ_FLAG_SCROLLABLE); /// Flags
+    lv_obj_set_style_bg_color(ui_PlantScreenPumpPanel, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui_PlantScreenPumpPanel, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_width(ui_PlantScreenPumpPanel, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_left(ui_PlantScreenPumpPanel, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_right(ui_PlantScreenPumpPanel, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_top(ui_PlantScreenPumpPanel, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_bottom(ui_PlantScreenPumpPanel, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 
-    ui_PlantScreenPump1Label = lv_label_create(ui_PlantScreenPump1Panel);
-    lv_obj_set_width(ui_PlantScreenPump1Label, LV_SIZE_CONTENT);  /// 1
-    lv_obj_set_height(ui_PlantScreenPump1Label, LV_SIZE_CONTENT); /// 1
-    lv_obj_set_x(ui_PlantScreenPump1Label, -64);
-    lv_obj_set_y(ui_PlantScreenPump1Label, -24);
-    lv_obj_set_align(ui_PlantScreenPump1Label, LV_ALIGN_CENTER);
-    lv_label_set_text(ui_PlantScreenPump1Label, "Pump 1");
+    ui_PlantScreenPumpLabel = lv_label_create(ui_PlantScreenPumpPanel);
+    lv_obj_set_width(ui_PlantScreenPumpLabel, LV_SIZE_CONTENT);  /// 1
+    lv_obj_set_height(ui_PlantScreenPumpLabel, LV_SIZE_CONTENT); /// 1
+    lv_obj_set_x(ui_PlantScreenPumpLabel, -64);
+    lv_obj_set_y(ui_PlantScreenPumpLabel, -24);
+    lv_obj_set_align(ui_PlantScreenPumpLabel, LV_ALIGN_CENTER);
+    lv_label_set_text(ui_PlantScreenPumpLabel, "Pump");
 
-    ui_PlantScreenPump1Switch = lv_switch_create(ui_PlantScreenPump1Panel);
-    lv_obj_set_width(ui_PlantScreenPump1Switch, 50);
-    lv_obj_set_height(ui_PlantScreenPump1Switch, 25);
-    lv_obj_set_x(ui_PlantScreenPump1Switch, 146);
-    lv_obj_set_y(ui_PlantScreenPump1Switch, 3);
-    lv_obj_set_align(ui_PlantScreenPump1Switch, LV_ALIGN_CENTER);
+    ui_PlantScreenPumpSwitch = lv_switch_create(ui_PlantScreenPumpPanel);
+    lv_obj_set_width(ui_PlantScreenPumpSwitch, 50);
+    lv_obj_set_height(ui_PlantScreenPumpSwitch, 25);
+    lv_obj_set_x(ui_PlantScreenPumpSwitch, 146);
+    lv_obj_set_y(ui_PlantScreenPumpSwitch, 3);
+    lv_obj_set_align(ui_PlantScreenPumpSwitch, LV_ALIGN_CENTER);
 
-    ui_PlantScreenPump2Panel = lv_obj_create(ui_PlantScreenSwitchPanel);
-    lv_obj_set_width(ui_PlantScreenPump2Panel, 275);
-    lv_obj_set_height(ui_PlantScreenPump2Panel, 25);
-    lv_obj_set_align(ui_PlantScreenPump2Panel, LV_ALIGN_CENTER);
-    lv_obj_set_flex_flow(ui_PlantScreenPump2Panel, LV_FLEX_FLOW_ROW);
-    lv_obj_set_flex_align(ui_PlantScreenPump2Panel, LV_FLEX_ALIGN_SPACE_BETWEEN, LV_FLEX_ALIGN_CENTER,
-                          LV_FLEX_ALIGN_CENTER);
-    lv_obj_clear_flag(ui_PlantScreenPump2Panel, LV_OBJ_FLAG_SCROLLABLE); /// Flags
-    lv_obj_set_style_bg_color(ui_PlantScreenPump2Panel, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_opa(ui_PlantScreenPump2Panel, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_border_width(ui_PlantScreenPump2Panel, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_pad_left(ui_PlantScreenPump2Panel, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_pad_right(ui_PlantScreenPump2Panel, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_pad_top(ui_PlantScreenPump2Panel, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_pad_bottom(ui_PlantScreenPump2Panel, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    ui_PlantScreenFanPanel = lv_obj_create(ui_PlantScreenSwitchPanel);
+    lv_obj_set_width(ui_PlantScreenFanPanel, 275);
+    lv_obj_set_height(ui_PlantScreenFanPanel, 25);
+    lv_obj_set_align(ui_PlantScreenFanPanel, LV_ALIGN_CENTER);
+    lv_obj_set_flex_flow(ui_PlantScreenFanPanel, LV_FLEX_FLOW_ROW);
+    lv_obj_set_flex_align(ui_PlantScreenFanPanel, LV_FLEX_ALIGN_SPACE_BETWEEN, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+    lv_obj_clear_flag(ui_PlantScreenFanPanel, LV_OBJ_FLAG_SCROLLABLE); /// Flags
+    lv_obj_set_style_bg_color(ui_PlantScreenFanPanel, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui_PlantScreenFanPanel, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_width(ui_PlantScreenFanPanel, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_left(ui_PlantScreenFanPanel, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_right(ui_PlantScreenFanPanel, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_top(ui_PlantScreenFanPanel, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_bottom(ui_PlantScreenFanPanel, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 
-    ui_PlantScreenPump2Label = lv_label_create(ui_PlantScreenPump2Panel);
-    lv_obj_set_width(ui_PlantScreenPump2Label, LV_SIZE_CONTENT);  /// 1
-    lv_obj_set_height(ui_PlantScreenPump2Label, LV_SIZE_CONTENT); /// 1
-    lv_obj_set_x(ui_PlantScreenPump2Label, -64);
-    lv_obj_set_y(ui_PlantScreenPump2Label, -24);
-    lv_obj_set_align(ui_PlantScreenPump2Label, LV_ALIGN_CENTER);
-    lv_label_set_text(ui_PlantScreenPump2Label, "Pump 2");
+    ui_PlantScreenFanLabel = lv_label_create(ui_PlantScreenFanPanel);
+    lv_obj_set_width(ui_PlantScreenFanLabel, LV_SIZE_CONTENT);  /// 1
+    lv_obj_set_height(ui_PlantScreenFanLabel, LV_SIZE_CONTENT); /// 1
+    lv_obj_set_x(ui_PlantScreenFanLabel, -64);
+    lv_obj_set_y(ui_PlantScreenFanLabel, -24);
+    lv_obj_set_align(ui_PlantScreenFanLabel, LV_ALIGN_CENTER);
+    lv_label_set_text(ui_PlantScreenFanLabel, "Fan");
 
-    ui_PlantScreenPump2Switch = lv_switch_create(ui_PlantScreenPump2Panel);
-    lv_obj_set_width(ui_PlantScreenPump2Switch, 50);
-    lv_obj_set_height(ui_PlantScreenPump2Switch, 25);
-    lv_obj_set_x(ui_PlantScreenPump2Switch, 146);
-    lv_obj_set_y(ui_PlantScreenPump2Switch, 3);
-    lv_obj_set_align(ui_PlantScreenPump2Switch, LV_ALIGN_CENTER);
+    ui_PlantScreenFanSwitch = lv_switch_create(ui_PlantScreenFanPanel);
+    lv_obj_set_width(ui_PlantScreenFanSwitch, 50);
+    lv_obj_set_height(ui_PlantScreenFanSwitch, 25);
+    lv_obj_set_x(ui_PlantScreenFanSwitch, 146);
+    lv_obj_set_y(ui_PlantScreenFanSwitch, 3);
+    lv_obj_set_align(ui_PlantScreenFanSwitch, LV_ALIGN_CENTER);
 
     ui_PlantScreenStatusLabel = lv_label_create(ui_PlantScreen);
     lv_obj_set_width(ui_PlantScreenStatusLabel, LV_SIZE_CONTENT);  /// 1
@@ -372,8 +370,8 @@ void ui_PlantScreen_screen_init(void)
 
     lv_obj_add_event_cb(ui_DataScreenSettingBtn, ui_event_DataScreenSettingBtn, LV_EVENT_ALL, NULL);
     lv_obj_add_event_cb(ui_PlantScreenLedSwitch, ui_event_PlantScreenLedSwitch, LV_EVENT_ALL, NULL);
-    lv_obj_add_event_cb(ui_PlantScreenPump1Switch, ui_event_PlantScreenPump1Switch, LV_EVENT_ALL, NULL);
-    lv_obj_add_event_cb(ui_PlantScreenPump2Switch, ui_event_PlantScreenPump2Switch, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(ui_PlantScreenPumpSwitch, ui_event_PlantScreenPumpSwitch, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(ui_PlantScreenFanSwitch, ui_event_PlantScreenFanSwitch, LV_EVENT_ALL, NULL);
 }
 
 // PROJECT: Plant_Screen_2
@@ -857,16 +855,16 @@ lv_obj_t *ui_SettingScreen2LedSlotLabel;
 void ui_event_SettingScreen2TempSlotEditBtn1(lv_event_t *e);
 lv_obj_t *ui_SettingScreen2TempSlotEditBtn1;
 lv_obj_t *ui_SettingScreen2TempSlotEditImg1;
-lv_obj_t *ui_SettingScreen2Pump1SlotLabel;
-lv_obj_t *ui_SettingScreen2Pump1SlotTextArea;
-void ui_event_SettingScreen2Pump1SlotEditBtn(lv_event_t *e);
-lv_obj_t *ui_SettingScreen2Pump1SlotEditBtn;
-lv_obj_t *ui_SettingScreen2Pump1SlotEditImg;
-lv_obj_t *ui_SettingScreen2Pump2SlotLabel;
-lv_obj_t *ui_SettingScreen2Pump2SlotTextArea;
-void ui_event_SettingScreen2Pump2SlotEditBtn(lv_event_t *e);
-lv_obj_t *ui_SettingScreen2Pump2SlotEditBtn;
-lv_obj_t *ui_SettingScreen2Pump2SlotEditImg;
+lv_obj_t *ui_SettingScreen2PumpSlotLabel;
+lv_obj_t *ui_SettingScreen2PumpSlotTextArea;
+void ui_event_SettingScreen2PumpSlotEditBtn(lv_event_t *e);
+lv_obj_t *ui_SettingScreen2PumpSlotEditBtn;
+lv_obj_t *ui_SettingScreen2PumpSlotEditImg;
+lv_obj_t *ui_SettingScreen2FanSlotLabel;
+lv_obj_t *ui_SettingScreen2FanSlotTextArea;
+void ui_event_SettingScreen2FanSlotEditBtn(lv_event_t *e);
+lv_obj_t *ui_SettingScreen2FanSlotEditBtn;
+lv_obj_t *ui_SettingScreen2FanSlotEditImg;
 void ui_event_SettingScreen2ConfirmBtn(lv_event_t *e);
 lv_obj_t *ui_SettingScreen2ConfirmBtn;
 lv_obj_t *ui_SettingScreen2ConfirmLabel;
@@ -933,22 +931,22 @@ void ui_event_SettingScreen2TempSlotEditBtn1(lv_event_t *e)
         toEditLedSlot(e);
     }
 }
-void ui_event_SettingScreen2Pump1SlotEditBtn(lv_event_t *e)
+void ui_event_SettingScreen2PumpSlotEditBtn(lv_event_t *e)
 {
     lv_event_code_t event_code = lv_event_get_code(e);
     lv_obj_t *target = lv_event_get_target(e);
     if (event_code == LV_EVENT_CLICKED)
     {
-        toEditPump1Slot(e);
+        toEditPumpSlot(e);
     }
 }
-void ui_event_SettingScreen2Pump2SlotEditBtn(lv_event_t *e)
+void ui_event_SettingScreen2FanSlotEditBtn(lv_event_t *e)
 {
     lv_event_code_t event_code = lv_event_get_code(e);
     lv_obj_t *target = lv_event_get_target(e);
     if (event_code == LV_EVENT_CLICKED)
     {
-        toEditPump2Slot(e);
+        toEditFanSlot(e);
     }
 }
 void ui_event_SettingScreen2ConfirmBtn(lv_event_t *e)
@@ -1216,83 +1214,83 @@ void ui_SettingScreen2_screen_init(void)
     lv_obj_add_flag(ui_SettingScreen2TempSlotEditImg1, LV_OBJ_FLAG_ADV_HITTEST);  /// Flags
     lv_obj_clear_flag(ui_SettingScreen2TempSlotEditImg1, LV_OBJ_FLAG_SCROLLABLE); /// Flags
 
-    ui_SettingScreen2Pump1SlotLabel = lv_label_create(ui_SettingScreen2Panel);
-    lv_obj_set_width(ui_SettingScreen2Pump1SlotLabel, LV_SIZE_CONTENT);  /// 1
-    lv_obj_set_height(ui_SettingScreen2Pump1SlotLabel, LV_SIZE_CONTENT); /// 1
-    lv_obj_set_x(ui_SettingScreen2Pump1SlotLabel, 220);
-    lv_obj_set_y(ui_SettingScreen2Pump1SlotLabel, -5);
-    lv_obj_set_align(ui_SettingScreen2Pump1SlotLabel, LV_ALIGN_LEFT_MID);
-    lv_label_set_text(ui_SettingScreen2Pump1SlotLabel, "Pump 1");
+    ui_SettingScreen2PumpSlotLabel = lv_label_create(ui_SettingScreen2Panel);
+    lv_obj_set_width(ui_SettingScreen2PumpSlotLabel, LV_SIZE_CONTENT);  /// 1
+    lv_obj_set_height(ui_SettingScreen2PumpSlotLabel, LV_SIZE_CONTENT); /// 1
+    lv_obj_set_x(ui_SettingScreen2PumpSlotLabel, 220);
+    lv_obj_set_y(ui_SettingScreen2PumpSlotLabel, -5);
+    lv_obj_set_align(ui_SettingScreen2PumpSlotLabel, LV_ALIGN_LEFT_MID);
+    lv_label_set_text(ui_SettingScreen2PumpSlotLabel, "Pump");
 
-    ui_SettingScreen2Pump1SlotTextArea = lv_textarea_create(ui_SettingScreen2Panel);
-    lv_obj_set_width(ui_SettingScreen2Pump1SlotTextArea, 75);
-    lv_obj_set_height(ui_SettingScreen2Pump1SlotTextArea, LV_SIZE_CONTENT); /// 1
-    lv_obj_set_x(ui_SettingScreen2Pump1SlotTextArea, 290);
-    lv_obj_set_y(ui_SettingScreen2Pump1SlotTextArea, -5);
-    lv_obj_set_align(ui_SettingScreen2Pump1SlotTextArea, LV_ALIGN_LEFT_MID);
-    lv_textarea_set_placeholder_text(ui_SettingScreen2Pump1SlotTextArea, "Slot...");
-    lv_textarea_set_one_line(ui_SettingScreen2Pump1SlotTextArea, true);
-    lv_obj_clear_flag(ui_SettingScreen2Pump1SlotTextArea, LV_OBJ_FLAG_CLICKABLE); /// Flags
-    lv_obj_set_style_pad_left(ui_SettingScreen2Pump1SlotTextArea, 7, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_pad_right(ui_SettingScreen2Pump1SlotTextArea, 7, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_pad_top(ui_SettingScreen2Pump1SlotTextArea, 7, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_pad_bottom(ui_SettingScreen2Pump1SlotTextArea, 7, LV_PART_MAIN | LV_STATE_DEFAULT);
+    ui_SettingScreen2PumpSlotTextArea = lv_textarea_create(ui_SettingScreen2Panel);
+    lv_obj_set_width(ui_SettingScreen2PumpSlotTextArea, 75);
+    lv_obj_set_height(ui_SettingScreen2PumpSlotTextArea, LV_SIZE_CONTENT); /// 1
+    lv_obj_set_x(ui_SettingScreen2PumpSlotTextArea, 290);
+    lv_obj_set_y(ui_SettingScreen2PumpSlotTextArea, -5);
+    lv_obj_set_align(ui_SettingScreen2PumpSlotTextArea, LV_ALIGN_LEFT_MID);
+    lv_textarea_set_placeholder_text(ui_SettingScreen2PumpSlotTextArea, "Slot...");
+    lv_textarea_set_one_line(ui_SettingScreen2PumpSlotTextArea, true);
+    lv_obj_clear_flag(ui_SettingScreen2PumpSlotTextArea, LV_OBJ_FLAG_CLICKABLE); /// Flags
+    lv_obj_set_style_pad_left(ui_SettingScreen2PumpSlotTextArea, 7, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_right(ui_SettingScreen2PumpSlotTextArea, 7, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_top(ui_SettingScreen2PumpSlotTextArea, 7, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_bottom(ui_SettingScreen2PumpSlotTextArea, 7, LV_PART_MAIN | LV_STATE_DEFAULT);
 
-    ui_SettingScreen2Pump1SlotEditBtn = lv_btn_create(ui_SettingScreen2Panel);
-    lv_obj_set_width(ui_SettingScreen2Pump1SlotEditBtn, 32);
-    lv_obj_set_height(ui_SettingScreen2Pump1SlotEditBtn, 32);
-    lv_obj_set_x(ui_SettingScreen2Pump1SlotEditBtn, 190);
-    lv_obj_set_y(ui_SettingScreen2Pump1SlotEditBtn, -5);
-    lv_obj_set_align(ui_SettingScreen2Pump1SlotEditBtn, LV_ALIGN_CENTER);
-    lv_obj_add_flag(ui_SettingScreen2Pump1SlotEditBtn, LV_OBJ_FLAG_SCROLL_ON_FOCUS); /// Flags
-    lv_obj_clear_flag(ui_SettingScreen2Pump1SlotEditBtn, LV_OBJ_FLAG_SCROLLABLE);    /// Flags
+    ui_SettingScreen2PumpSlotEditBtn = lv_btn_create(ui_SettingScreen2Panel);
+    lv_obj_set_width(ui_SettingScreen2PumpSlotEditBtn, 32);
+    lv_obj_set_height(ui_SettingScreen2PumpSlotEditBtn, 32);
+    lv_obj_set_x(ui_SettingScreen2PumpSlotEditBtn, 190);
+    lv_obj_set_y(ui_SettingScreen2PumpSlotEditBtn, -5);
+    lv_obj_set_align(ui_SettingScreen2PumpSlotEditBtn, LV_ALIGN_CENTER);
+    lv_obj_add_flag(ui_SettingScreen2PumpSlotEditBtn, LV_OBJ_FLAG_SCROLL_ON_FOCUS); /// Flags
+    lv_obj_clear_flag(ui_SettingScreen2PumpSlotEditBtn, LV_OBJ_FLAG_SCROLLABLE);    /// Flags
 
-    ui_SettingScreen2Pump1SlotEditImg = lv_img_create(ui_SettingScreen2Pump1SlotEditBtn);
-    lv_img_set_src(ui_SettingScreen2Pump1SlotEditImg, &ui_img_pen_square_png);
-    lv_obj_set_width(ui_SettingScreen2Pump1SlotEditImg, LV_SIZE_CONTENT);  /// 1
-    lv_obj_set_height(ui_SettingScreen2Pump1SlotEditImg, LV_SIZE_CONTENT); /// 1
-    lv_obj_set_align(ui_SettingScreen2Pump1SlotEditImg, LV_ALIGN_CENTER);
-    lv_obj_add_flag(ui_SettingScreen2Pump1SlotEditImg, LV_OBJ_FLAG_ADV_HITTEST);  /// Flags
-    lv_obj_clear_flag(ui_SettingScreen2Pump1SlotEditImg, LV_OBJ_FLAG_SCROLLABLE); /// Flags
+    ui_SettingScreen2PumpSlotEditImg = lv_img_create(ui_SettingScreen2PumpSlotEditBtn);
+    lv_img_set_src(ui_SettingScreen2PumpSlotEditImg, &ui_img_pen_square_png);
+    lv_obj_set_width(ui_SettingScreen2PumpSlotEditImg, LV_SIZE_CONTENT);  /// 1
+    lv_obj_set_height(ui_SettingScreen2PumpSlotEditImg, LV_SIZE_CONTENT); /// 1
+    lv_obj_set_align(ui_SettingScreen2PumpSlotEditImg, LV_ALIGN_CENTER);
+    lv_obj_add_flag(ui_SettingScreen2PumpSlotEditImg, LV_OBJ_FLAG_ADV_HITTEST);  /// Flags
+    lv_obj_clear_flag(ui_SettingScreen2PumpSlotEditImg, LV_OBJ_FLAG_SCROLLABLE); /// Flags
 
-    ui_SettingScreen2Pump2SlotLabel = lv_label_create(ui_SettingScreen2Panel);
-    lv_obj_set_width(ui_SettingScreen2Pump2SlotLabel, LV_SIZE_CONTENT);  /// 1
-    lv_obj_set_height(ui_SettingScreen2Pump2SlotLabel, LV_SIZE_CONTENT); /// 1
-    lv_obj_set_x(ui_SettingScreen2Pump2SlotLabel, 220);
-    lv_obj_set_y(ui_SettingScreen2Pump2SlotLabel, 35);
-    lv_obj_set_align(ui_SettingScreen2Pump2SlotLabel, LV_ALIGN_LEFT_MID);
-    lv_label_set_text(ui_SettingScreen2Pump2SlotLabel, "Pump 2");
+    ui_SettingScreen2FanSlotLabel = lv_label_create(ui_SettingScreen2Panel);
+    lv_obj_set_width(ui_SettingScreen2FanSlotLabel, LV_SIZE_CONTENT);  /// 1
+    lv_obj_set_height(ui_SettingScreen2FanSlotLabel, LV_SIZE_CONTENT); /// 1
+    lv_obj_set_x(ui_SettingScreen2FanSlotLabel, 220);
+    lv_obj_set_y(ui_SettingScreen2FanSlotLabel, 35);
+    lv_obj_set_align(ui_SettingScreen2FanSlotLabel, LV_ALIGN_LEFT_MID);
+    lv_label_set_text(ui_SettingScreen2FanSlotLabel, "Fan");
 
-    ui_SettingScreen2Pump2SlotTextArea = lv_textarea_create(ui_SettingScreen2Panel);
-    lv_obj_set_width(ui_SettingScreen2Pump2SlotTextArea, 75);
-    lv_obj_set_height(ui_SettingScreen2Pump2SlotTextArea, LV_SIZE_CONTENT); /// 1
-    lv_obj_set_x(ui_SettingScreen2Pump2SlotTextArea, 290);
-    lv_obj_set_y(ui_SettingScreen2Pump2SlotTextArea, 35);
-    lv_obj_set_align(ui_SettingScreen2Pump2SlotTextArea, LV_ALIGN_LEFT_MID);
-    lv_textarea_set_placeholder_text(ui_SettingScreen2Pump2SlotTextArea, "Slot...");
-    lv_textarea_set_one_line(ui_SettingScreen2Pump2SlotTextArea, true);
-    lv_obj_clear_flag(ui_SettingScreen2Pump2SlotTextArea, LV_OBJ_FLAG_CLICKABLE); /// Flags
-    lv_obj_set_style_pad_left(ui_SettingScreen2Pump2SlotTextArea, 7, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_pad_right(ui_SettingScreen2Pump2SlotTextArea, 7, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_pad_top(ui_SettingScreen2Pump2SlotTextArea, 7, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_pad_bottom(ui_SettingScreen2Pump2SlotTextArea, 7, LV_PART_MAIN | LV_STATE_DEFAULT);
+    ui_SettingScreen2FanSlotTextArea = lv_textarea_create(ui_SettingScreen2Panel);
+    lv_obj_set_width(ui_SettingScreen2FanSlotTextArea, 75);
+    lv_obj_set_height(ui_SettingScreen2FanSlotTextArea, LV_SIZE_CONTENT); /// 1
+    lv_obj_set_x(ui_SettingScreen2FanSlotTextArea, 290);
+    lv_obj_set_y(ui_SettingScreen2FanSlotTextArea, 35);
+    lv_obj_set_align(ui_SettingScreen2FanSlotTextArea, LV_ALIGN_LEFT_MID);
+    lv_textarea_set_placeholder_text(ui_SettingScreen2FanSlotTextArea, "Slot...");
+    lv_textarea_set_one_line(ui_SettingScreen2FanSlotTextArea, true);
+    lv_obj_clear_flag(ui_SettingScreen2FanSlotTextArea, LV_OBJ_FLAG_CLICKABLE); /// Flags
+    lv_obj_set_style_pad_left(ui_SettingScreen2FanSlotTextArea, 7, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_right(ui_SettingScreen2FanSlotTextArea, 7, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_top(ui_SettingScreen2FanSlotTextArea, 7, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_bottom(ui_SettingScreen2FanSlotTextArea, 7, LV_PART_MAIN | LV_STATE_DEFAULT);
 
-    ui_SettingScreen2Pump2SlotEditBtn = lv_btn_create(ui_SettingScreen2Panel);
-    lv_obj_set_width(ui_SettingScreen2Pump2SlotEditBtn, 32);
-    lv_obj_set_height(ui_SettingScreen2Pump2SlotEditBtn, 32);
-    lv_obj_set_x(ui_SettingScreen2Pump2SlotEditBtn, 190);
-    lv_obj_set_y(ui_SettingScreen2Pump2SlotEditBtn, 35);
-    lv_obj_set_align(ui_SettingScreen2Pump2SlotEditBtn, LV_ALIGN_CENTER);
-    lv_obj_add_flag(ui_SettingScreen2Pump2SlotEditBtn, LV_OBJ_FLAG_SCROLL_ON_FOCUS); /// Flags
-    lv_obj_clear_flag(ui_SettingScreen2Pump2SlotEditBtn, LV_OBJ_FLAG_SCROLLABLE);    /// Flags
+    ui_SettingScreen2FanSlotEditBtn = lv_btn_create(ui_SettingScreen2Panel);
+    lv_obj_set_width(ui_SettingScreen2FanSlotEditBtn, 32);
+    lv_obj_set_height(ui_SettingScreen2FanSlotEditBtn, 32);
+    lv_obj_set_x(ui_SettingScreen2FanSlotEditBtn, 190);
+    lv_obj_set_y(ui_SettingScreen2FanSlotEditBtn, 35);
+    lv_obj_set_align(ui_SettingScreen2FanSlotEditBtn, LV_ALIGN_CENTER);
+    lv_obj_add_flag(ui_SettingScreen2FanSlotEditBtn, LV_OBJ_FLAG_SCROLL_ON_FOCUS); /// Flags
+    lv_obj_clear_flag(ui_SettingScreen2FanSlotEditBtn, LV_OBJ_FLAG_SCROLLABLE);    /// Flags
 
-    ui_SettingScreen2Pump2SlotEditImg = lv_img_create(ui_SettingScreen2Pump2SlotEditBtn);
-    lv_img_set_src(ui_SettingScreen2Pump2SlotEditImg, &ui_img_pen_square_png);
-    lv_obj_set_width(ui_SettingScreen2Pump2SlotEditImg, LV_SIZE_CONTENT);  /// 1
-    lv_obj_set_height(ui_SettingScreen2Pump2SlotEditImg, LV_SIZE_CONTENT); /// 1
-    lv_obj_set_align(ui_SettingScreen2Pump2SlotEditImg, LV_ALIGN_CENTER);
-    lv_obj_add_flag(ui_SettingScreen2Pump2SlotEditImg, LV_OBJ_FLAG_ADV_HITTEST);  /// Flags
-    lv_obj_clear_flag(ui_SettingScreen2Pump2SlotEditImg, LV_OBJ_FLAG_SCROLLABLE); /// Flags
+    ui_SettingScreen2FanSlotEditImg = lv_img_create(ui_SettingScreen2FanSlotEditBtn);
+    lv_img_set_src(ui_SettingScreen2FanSlotEditImg, &ui_img_pen_square_png);
+    lv_obj_set_width(ui_SettingScreen2FanSlotEditImg, LV_SIZE_CONTENT);  /// 1
+    lv_obj_set_height(ui_SettingScreen2FanSlotEditImg, LV_SIZE_CONTENT); /// 1
+    lv_obj_set_align(ui_SettingScreen2FanSlotEditImg, LV_ALIGN_CENTER);
+    lv_obj_add_flag(ui_SettingScreen2FanSlotEditImg, LV_OBJ_FLAG_ADV_HITTEST);  /// Flags
+    lv_obj_clear_flag(ui_SettingScreen2FanSlotEditImg, LV_OBJ_FLAG_SCROLLABLE); /// Flags
 
     ui_SettingScreen2ConfirmBtn = lv_btn_create(ui_SettingScreen2);
     lv_obj_set_width(ui_SettingScreen2ConfirmBtn, 90);
@@ -1346,8 +1344,8 @@ void ui_SettingScreen2_screen_init(void)
     lv_obj_add_event_cb(ui_SettingScreen2LightSlotEditBtn, ui_event_SettingScreen2LightSlotEditBtn, LV_EVENT_ALL, NULL);
     lv_obj_add_event_cb(ui_SettingScreen2WaterSlotEditBtn, ui_event_SettingScreen2WaterSlotEditBtn, LV_EVENT_ALL, NULL);
     lv_obj_add_event_cb(ui_SettingScreen2TempSlotEditBtn1, ui_event_SettingScreen2TempSlotEditBtn1, LV_EVENT_ALL, NULL);
-    lv_obj_add_event_cb(ui_SettingScreen2Pump1SlotEditBtn, ui_event_SettingScreen2Pump1SlotEditBtn, LV_EVENT_ALL, NULL);
-    lv_obj_add_event_cb(ui_SettingScreen2Pump2SlotEditBtn, ui_event_SettingScreen2Pump2SlotEditBtn, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(ui_SettingScreen2PumpSlotEditBtn, ui_event_SettingScreen2PumpSlotEditBtn, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(ui_SettingScreen2FanSlotEditBtn, ui_event_SettingScreen2FanSlotEditBtn, LV_EVENT_ALL, NULL);
     lv_obj_add_event_cb(ui_SettingScreen2ConfirmBtn, ui_event_SettingScreen2ConfirmBtn, LV_EVENT_ALL, NULL);
     lv_obj_add_event_cb(ui_SettingScreen2CancelBtn, ui_event_SettingScreen2CancelBtn, LV_EVENT_ALL, NULL);
     lv_obj_add_event_cb(ui_SettingScreen2PrevBtn, ui_event_SettingScreen2PrevBtn, LV_EVENT_ALL, NULL);
